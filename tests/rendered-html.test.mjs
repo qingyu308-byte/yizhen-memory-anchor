@@ -112,3 +112,18 @@ test("ships the memory assets and core interactions", async () => {
   assert.doesNotMatch(css, /trace-draw|veil-dissolve/);
   assert.match(css, /prefers-reduced-motion/);
 });
+
+test("includes an automated GitHub Pages export", async () => {
+  const [packageJson, exporter, workflow] = await Promise.all([
+    readFile(new URL("../package.json", import.meta.url), "utf8"),
+    readFile(new URL("../scripts/export-github-pages.mjs", import.meta.url), "utf8"),
+    readFile(new URL("../.github/workflows/deploy-github-pages.yml", import.meta.url), "utf8"),
+  ]);
+
+  assert.match(packageJson, /export:github-pages/);
+  assert.match(exporter, /dist["'], ["']github-pages/);
+  assert.match(exporter, /\.nojekyll/);
+  assert.match(exporter, /GITHUB_PAGES_BASE_PATH/);
+  assert.match(workflow, /actions\/deploy-pages@v4/);
+  assert.match(workflow, /npm run export:github-pages/);
+});
